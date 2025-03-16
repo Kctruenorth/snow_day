@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snow Day Predictor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #004080;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .container img {
+            width: 80px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        
+input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        input:focus, button:focus, select:focus {
+        .progress-container {
+            width: 100%;
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-sizing: border-box;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 15px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .slider-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .slider-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .loading img {
+            width: 50px;
+            height: auto;
+        }
+
+        .loading p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #008080;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snow Day Predictor</h1>
+    <div class="container">
+        <img src="https://www.iconarchive.com/download/i103483/paomedia/small-n-flat/snow-flake.1024.png" alt="Snowflake">
+
+        <label for="cloverCount">Enter the number of four-leaf clovers you've found:</label>
+        <input type="number" id="cloverCount" min="0" placeholder="Number of clovers">
+
+        <label for="sigmaLevel">How sigma are you on a scale of 0-1000?</label>
+        <div class="slider-container">
+            <input type="range" id="sigmaLevel" min="0" max="1000" step="1" value="0">
+            <p class="slider-value" id="sigmaLevelValue">Sigma Level: 0</p>
+        </div>
+
+        <label for="jawlineAngle">What is the angle of your jawline (in degrees)?</label>
+        <input type="number" id="jawlineAngle" min="0" max="180" placeholder="Jawline Angle">
+
+        <div class="slider-container">
+            <label for="mewingStreak">How many days have you been on a mewing streak?</label>
+            <input type="range" id="mewingStreak" min="0" max="365" step="1" value="0">
+            <p class="slider-value" id="mewingStreakValue">0 days</p>
+        </div>
+
+        <label for="aura">How much aura do you have? (Negative or Positive)</label>
+        <input type="number" id="aura" placeholder="Aura Value (e.g. -50, +100)">
+
+        <label for="rizzLevel">Select your rizz level:</label>
+        <select id="rizzLevel">
+            <option value="L">L Rizz</option>
+            <option value="Mid">Mid Rizz</option>
+            <option value="W">W Rizz</option>
+        </select>
+
+        <button onclick="predictSnowDay()">Predict Snow Day</button>
+
+        <div class="percentage" id="snowDayPercentage"></div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="factors" id="factorsList"></div>
+
+        <div class="loading" id="loading">
+            <img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" alt="Loading...">
+            <p>Calculating...</p>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Powered by your luck, some very random factors, and the moon!</p>
+    </div>
+
+    <script>
+        // Update slider values dynamically
+        const sigmaSlider = document.getElementById('sigmaLevel');
+        const sigmaLevelValue = document.getElementById('sigmaLevelValue');
+        const mewingStreakSlider = document.getElementById('mewingStreak');
+        const mewingStreakValue = document.getElementById('mewingStreakValue');
+
+        sigmaSlider.addEventListener('input', () => {
+            sigmaLevelValue.textContent = 'Sigma Level: ' + sigmaSlider.value;
+        });
+
+        mewingStreakSlider.addEventListener('input', () => {
+            mewingStreakValue.textContent = mewingStreakSlider.value + ' days';
+        });
+
+        async function predictSnowDay() {
+            // Show loading animation
+            document.getElementById('loading').style.display = 'block';
+
+            const cloverCount = parseInt(document.getElementById('cloverCount').value) || 0;
+            const sigmaLevel = parseInt(document.getElementById('sigmaLevel').value) || 0;
+            const jawAngle = parseInt(document.getElementById('jawlineAngle').value) || 0;
+            const mewingStreak = parseInt(document.getElementById('mewingStreak').value) || 0;
+            const aura = parseInt(document.getElementById('aura').value) || 0;
+            const rizzLevel = document.getElementById('rizzLevel').value;
+
+            if (sigmaLevel > 1000 || jawAngle > 180) {
+                alert("Your sigma level or jawline angle is unrealistic. Try again.");
+                document.getElementById('loading').style.display = 'none'; // Hide loading animation
+                return;
+            }
+
+            const weatherApiUrlEgypt = 'https://api.open-meteo.com/v1/forecast?latitude=30.0444&longitude=31.2357&current=temperature_2m&timezone=auto';
+            const weatherApiUrlAntarctica = 'https://api.open-meteo.com/v1/forecast?latitude=-90.0000&longitude=0.0000&current=windspeed_10m&timezone=auto';
+            const lunarApiUrl = `https://api.farmsense.net/v1/moonphases/?d=${Math.floor(Date.now() / 1000)}`;
+
+            try {
+                const [responseEgypt, responseAntarctica, lunarResponse] = await Promise.all([
+                    fetch(weatherApiUrlEgypt),
+                    fetch(weatherApiUrlAntarctica),
+                    fetch(lunarApiUrl)
+                ]);
+
+                const weatherDataEgypt = await responseEgypt.json();
+                const weatherDataAntarctica = await responseAntarctica.json();
+                const lunarData = await lunarResponse.json();
+
+                const temperatureC = weatherDataEgypt.current.temperature_2m;
+                const windSpeed = weatherDataAntarctica.current.windspeed_10m;
+                const lunarPhase = lunarData[0].Phase;
+
+                let snowDayProbability = 0.1;
+
+                snowDayProbability += Math.min(cloverCount * 0.005, 0.5);
+                snowDayProbability += temperatureC < 0 ? 0.3 : 0;
+                snowDayProbability += windSpeed > 50 ? 0.2 : 0;
+                snowDayProbability += jawAngle < 90 ? 0.15 : 0;
+                snowDayProbability += mewingStreak > 30 ? 0.15 : 0;
+                snowDayProbability += aura > 50 ? 0.2 : aura < -50 ? -0.2 : 0;
+                snowDayProbability += lunarPhase === "Full Moon" ? 0.25 : lunarPhase === "New Moon" ? 0.1 : 0;
+
+                if (rizzLevel === "W") snowDayProbability += 0.3;
+                if (rizzLevel === "Mid") snowDayProbability += 0.1;
+                if (rizzLevel === "L") snowDayProbability -= 0.1;
+
+                const snowDayPercentage = (snowDayProbability * 100).toFixed(2) + '%';
+                document.getElementById('snowDayPercentage').innerText = `Your chance of having a snow day is: ${snowDayPercentage}`;
+
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = snowDayProbability * 100 + '%';
+                progressBar.style.backgroundColor = snowDayProbability > 0.7 ? '#4caf50' : snowDayProbability > 0.4 ? '#ffeb3b' : '#f44336';
+
+                const factorsText = `
+                    <strong>Factors:</strong><br>
+                    Four-leaf clovers: ${cloverCount} clovers<br>
+                    Sigma Level: ${sigmaLevel}<br>
+                    Jawline angle: ${jawAngle}°<br>
+                    Mewing streak: ${mewingStreak} days<br>
+                    Aura: ${aura}<br>
+                    Rizz Level: ${rizzLevel}<br>
+                    Current temperature in Cairo, Egypt: ${temperatureC.toFixed(1)}°C<br>
+                    Wind speed in Antarctica: ${windSpeed.toFixed(1)} km/h<br>
+                    Lunar phase: ${lunarPhase}<br>
+                `;
+                document.getElementById('factorsList').innerHTML = factorsText;
+
+            } catch (error) {
+                console.error('Error fetching weather or lunar phase data:', error);
+                alert('Failed to retrieve data. Please try again later.');
+            }
+
+            // Hide loading animation
+            document.getElementById('loading').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
